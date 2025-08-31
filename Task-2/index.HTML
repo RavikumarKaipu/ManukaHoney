@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+   <meta charset="UTF-8">
+   <title>Nested Checkbox</title>
+   <style>
+       body {
+           font-family: Arial, sans-serif;
+           padding: 20px;
+           background: #f9f9f9;
+       }
+       h2 {
+           margin-bottom: 15px;
+           color: #333;
+       }
+       .category {
+           margin-top: 15px;
+           padding: 10px;
+           border: 1px solid #ddd;
+           border-radius: 8px;
+           background: #fff;
+           box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+           max-width: 250px;
+       }
+       .items {
+           margin-left: 25px;
+           margin-top: 8px;
+       }
+       label {
+           display: flex;
+           align-items: center;
+           gap: 8px;
+           margin: 4px 0;
+           cursor: pointer;
+           font-size: 14px;
+           color: #444;
+       }
+       input[type="checkbox"] {
+           transform: scale(1.2);
+           cursor: pointer;
+       }
+   </style>
+</head>
+<body>
+   <h2>Nested Checkbox</h2>
+
+
+   <label>
+       <input type="checkbox" id="selectAll">
+       <strong>Select All</strong>
+   </label>
+
+   <!-- Fruits -->
+   <div class="category">
+       <label>
+           <input type="checkbox" class="category-checkbox" data-category="fruits">
+           <strong>Fruits</strong>
+       </label>
+       <div class="items">
+           <label><input type="checkbox" class="fruit"> Apple</label>
+           <label><input type="checkbox" class="fruit"> Banana</label>
+           <label><input type="checkbox" class="fruit"> Orange</label>
+       </div>
+   </div>
+
+   <!-- Vegetables -->
+   <div class="category">
+       <label>
+           <input type="checkbox" class="category-checkbox" data-category="vegetables">
+           <strong>Vegetables</strong>
+       </label>
+       <div class="items">
+           <label><input type="checkbox" class="vegetable"> Carrot</label>
+           <label><input type="checkbox" class="vegetable"> Broccoli</label>
+           <label><input type="checkbox" class="vegetable"> Potato</label>
+       </div>
+   </div>
+
+   <script>
+       const selectAll = document.getElementById("selectAll");
+       const categoryCheckboxes = document.querySelectorAll(".category-checkbox");
+       const fruits = document.querySelectorAll(".fruit");
+       const vegetables = document.querySelectorAll(".vegetable");
+
+       // Select All → toggle everything
+       selectAll.addEventListener("change", (e) => {
+           const checked = e.target.checked;
+           [...categoryCheckboxes, ...fruits, ...vegetables].forEach(cb => {
+               cb.checked = checked;
+               cb.indeterminate = false;
+           });
+       });
+
+       // Category checkbox → update its children
+       categoryCheckboxes.forEach(cb => {
+           cb.addEventListener("change", (e) => {
+               const checked = e.target.checked;
+               const category = cb.dataset.category;
+               const items = category === "fruits" ? fruits : vegetables;
+               items.forEach(item => item.checked = checked);
+               updateCategory(category, items);
+               updateSelectAll();
+           });
+       });
+
+       // Child checkbox → update parent & root
+       [...fruits, ...vegetables].forEach(cb => {
+           cb.addEventListener("change", () => {
+               updateCategory("fruits", fruits);
+               updateCategory("vegetables", vegetables);
+               updateSelectAll();
+           });
+       });
+
+       //  Update parent state based on children
+       function updateCategory(category, items) {
+           const categoryBox = document.querySelector(`.category-checkbox[data-category="${category}"]`);
+           const checkedCount = [...items].filter(i => i.checked).length;
+
+           if (checkedCount === items.length) {
+               categoryBox.checked = true;
+               categoryBox.indeterminate = false;
+           } else if (checkedCount > 0) {
+               categoryBox.checked = false;
+               categoryBox.indeterminate = true;
+           } else {
+               categoryBox.checked = false;
+               categoryBox.indeterminate = false;
+           }
+       }
+
+       // Update "Select All" based on everything
+       function updateSelectAll() {
+           const allItems = [...fruits, ...vegetables];
+           const checkedCount = allItems.filter(i => i.checked).length;
+
+           if (checkedCount === allItems.length) {
+               selectAll.checked = true;
+               selectAll.indeterminate = false;
+           } else if (checkedCount > 0) {
+               selectAll.checked = false;
+               selectAll.indeterminate = true;
+           } else {
+               selectAll.checked = false;
+               selectAll.indeterminate = false;
+           }
+       }
+   </script>
+</body>
+</html>
